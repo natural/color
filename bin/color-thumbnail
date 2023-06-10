@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+import argparse
+import sys
+
+try:
+    import png
+except (ImportError, ):
+    png = None
+
+
+def hex_to_rgba(v):
+    if len(v) == 3:
+        r, g, b, a = v[0] + v[0], v[1] + v[1], v[2] + v[2], 'FF'
+    elif len(v) == 4:
+        r, g, b, a = v[0] + v[0], v[1] + v[1], v[2] + v[2], v[3] + v[3]
+    elif len(v) == 6:
+        r, g, b, a = v[0:2], v[2:4], v[4:6], 'FF'
+    elif len(v) == 8:
+        r, g, b, a = v[0:2], v[2:4], v[4:6], v[6:8]
+    else:
+        raise TypeError('Unsupported hex length')
+    return tuple(map(lambda x: int(x, base=16), [r, g, b, a]))
+
+
+def main():
+    if png is None:
+        print("Missing pypng; run 'pip install pypng'")
+        sys.exit(-1)
+
+    prog = sys.argv[0]
+    parser = argparse.ArgumentParser(
+        prog=prog,
+        description='Generates image thumbnail of color constant'
+    )
+    parser.add_argument('rgba', type=hex_to_rgba, metavar='hex')
+    parser.add_argument('-d', '--dimension', default=32, type=int)
+    args = parser.parse_args()
+
+    dim = args.dimension
+    image = png.Writer(width=dim, height=dim, greyscale=False, alpha=True)
+    image.write(sys.stdout.buffer, rows=[args.rgba * dim] * dim)
+
+
+if __name__ == '__main__':
+    main()

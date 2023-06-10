@@ -1,0 +1,15 @@
+#!/bin/bash
+
+scrape () { 
+	curl https://en.wikipedia.org/wiki/Shades_of_$1  > shades_of_$1.html
+	cat shades_of_$1.html | ~/go/bin/pup 'table.infobox th.infobox-above text{}' >> $1.raw
+	cat shades_of_$1.html | ~/go/bin/pup 'table.infobox td.infobox-data:contains("#") text{}' >> $1.raw
+	rm shades_of_$1.html
+}
+
+colors="black blue brown cyan green grey magenta orange pink purple red violet white yellow"
+
+for color in $colors; do 
+	echo $color
+	scrape $color
+done
